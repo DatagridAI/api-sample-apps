@@ -17,7 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "datagrid-ai": "^0.1.0-alpha.5"
+    "datagrid-ai": "*"
   },
   "devDependencies": {
     "@types/chrome": "0.0.284",

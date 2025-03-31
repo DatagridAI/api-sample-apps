@@ -2,6 +2,16 @@
 <html>
   <head>
     <title>Datagrid Assistant Settings</title>
+    <!-- Primary CDN -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css"
+    />
+    <!-- Fallback CDN -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/7.4.47/css/materialdesignicons.min.css"
+    />
     <style>
       body {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
@@ -168,6 +178,217 @@
           transform: rotate(360deg);
         }
       }
+
+      .tools-selector {
+        position: relative;
+        width: 100%;
+      }
+
+      .tools-selector .select-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 12px;
+        border: 1px solid #e1e4e8;
+        border-radius: 6px;
+        background-color: #f8f9fa;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .tools-selector .search-input {
+        padding: 8px 12px;
+        border: 1px solid #e1e4e8;
+        border-radius: 6px;
+        margin: 8px;
+        width: calc(100% - 24px);
+        font-size: 14px;
+        background-color: #ffffff;
+      }
+
+      .tools-selector .search-input:focus {
+        outline: none;
+        border-color: #0066ff;
+        box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+      }
+
+      .tools-selector .category {
+        padding: 8px 12px;
+        background-color: #f3f4f6;
+        font-weight: 500;
+        color: #374151;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .tools-selector .option {
+        display: flex;
+        flex-direction: column;
+        padding: 8px 12px;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+      }
+
+      .tools-selector .option-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .tools-selector .option-name {
+        font-weight: 500;
+        color: #374151;
+      }
+
+      .tools-selector .option-description {
+        font-size: 13px;
+        color: #6b7280;
+        margin-left: 28px;
+        margin-top: 2px;
+      }
+
+      .tools-selector .no-results {
+        padding: 12px;
+        text-align: center;
+        color: #6b7280;
+        font-size: 14px;
+      }
+
+      .tools-selector .select-header:hover {
+        background-color: #f3f4f6;
+      }
+
+      .tools-selector .select-header:focus {
+        outline: none;
+        border-color: #0066ff;
+        background-color: #ffffff;
+        box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+      }
+
+      .tools-selector .select-header svg {
+        width: 20px;
+        height: 20px;
+        transition: transform 0.2s ease;
+      }
+
+      .tools-selector.open .select-header svg {
+        transform: rotate(180deg);
+      }
+
+      .tools-selector .select-options {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        margin-top: 4px;
+        background-color: #ffffff;
+        border: 1px solid #e1e4e8;
+        border-radius: 6px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .tools-selector.open .select-options {
+        display: block;
+      }
+
+      .tools-selector .option:hover {
+        background-color: #f3f4f6;
+      }
+
+      .tools-selector .option.selected {
+        background-color: #e5e7eb;
+      }
+
+      .tools-selector .option input[type="checkbox"] {
+        margin-right: 8px;
+      }
+
+      .tools-selector .selected-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-top: 8px;
+      }
+
+      .tools-selector .tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 8px;
+        background-color: #e5e7eb;
+        border-radius: 4px;
+        font-size: 12px;
+        color: #374151;
+      }
+
+      .tools-selector .tag button {
+        margin-left: 4px;
+        padding: 0;
+        background: none;
+        border: none;
+        color: #6b7280;
+        cursor: pointer;
+        font-size: 14px;
+        line-height: 1;
+      }
+
+      .tools-selector .tag button:hover {
+        color: #374151;
+      }
+
+      .tools-selector .placeholder {
+        color: #6b7280;
+      }
+
+      .category {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        background-color: #f5f5f5;
+        font-weight: 500;
+        color: #666;
+      }
+
+      .category i {
+        font-family: "Material Design Icons";
+        font-size: 18px;
+        color: #666;
+        display: inline-block;
+        line-height: 1;
+      }
+
+      .option-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .option-header i {
+        font-family: "Material Design Icons";
+        font-size: 18px;
+        color: #666;
+        display: inline-block;
+        line-height: 1;
+      }
+
+      .tag {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .tag i {
+        font-family: "Material Design Icons";
+        font-size: 16px;
+        color: #666;
+        display: inline-block;
+        line-height: 1;
+      }
     </style>
   </head>
   <body>
@@ -238,6 +459,38 @@
           </svg>
           Refresh Knowledge List
         </button>
+      </div>
+
+      <div class="form-group">
+        <label for="tools">Enabled Tools</label>
+        <div class="tools-selector" id="toolsSelector">
+          <div class="select-header">
+            <span class="placeholder">Select tools to enable</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </div>
+          <div class="select-options">
+            <input
+              type="text"
+              class="search-input"
+              placeholder="Search tools..."
+              id="toolSearch"
+            />
+            <div class="options-list"></div>
+          </div>
+          <div class="selected-tags"></div>
+        </div>
       </div>
 
       <div

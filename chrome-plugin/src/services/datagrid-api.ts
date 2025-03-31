@@ -87,7 +87,8 @@ export class DatagridAPI {
     htmlContext?: string,
     knowledgeId?: string | null | undefined,
     conversation_id?: string,
-    onChunk?: (chunk: StreamingResponse) => void
+    onChunk?: (chunk: StreamingResponse) => void,
+    tools?: Datagrid.AgentTools[]
   ): Promise<DatagridResponse> {
     try {
       // Get the last message from the user as the prompt
@@ -106,6 +107,7 @@ export class DatagridAPI {
         config: {
           agent_model: "mapgie-1.1",
           knowledge_ids,
+          agent_tools: tools,
         },
         conversation_id,
       } as const;
@@ -120,7 +122,6 @@ export class DatagridAPI {
         if (streamEvent.event === "delta") {
           const chunkText = streamEvent.data.delta.text;
           fullResponse += chunkText;
-          console.log("Chunk text:", chunkText);
 
           if (onChunk) {
             onChunk({

@@ -2,6 +2,7 @@
 import { getApiKey } from "./utils/storage";
 import { DatagridAPI } from "./services/datagrid-api";
 import { Message, ChatState } from "./types/chat";
+import type { Datagrid } from "datagrid-ai";
 
 class ChatUI {
   private readonly chatContainer: HTMLElement;
@@ -275,6 +276,12 @@ class ChatUI {
         return "";
       }
 
+      // Check if we're on a chrome:// URL
+      if (tab.url?.startsWith("chrome://")) {
+        console.log("Cannot access chrome:// URLs");
+        return "";
+      }
+
       const [result] = await chrome.scripting.executeScript({
         target: { tabId: tab.id },
         func: () => {
@@ -298,6 +305,13 @@ class ChatUI {
     }
 
     const selectedContent = await this.getSelectedPageContent();
+    const { selectedTools } = await chrome.storage.sync.get("selectedTools");
+
+    // Parse the selected tools from storage
+    const tools: Array<Datagrid.AgentTools> | undefined = selectedTools
+      ? selectedTools
+      : undefined;
+
 
     const message: Message = {
       id: crypto.randomUUID(),
@@ -350,7 +364,8 @@ class ChatUI {
               streamingMessage.content
             );
           }
-        }
+        },
+        tools
       );
 
       // Update conversation ID if we got one
@@ -371,7 +386,7 @@ class ChatUI {
       this.addMessage({
         id: crypto.randomUUID(),
         type: "assistant",
-        content: "Sorry, I encountered an error processing your request.",
+        content: `Sorry, I encountered an error processing your request.`,
         timestamp: Date.now(),
       });
       console.error("Error sending message:", error);
