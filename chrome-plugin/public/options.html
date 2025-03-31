@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
     <title>Datagrid Assistant Settings</title>
@@ -86,6 +86,12 @@
         background-color: #e5e7eb;
       }
 
+      button:disabled {
+        background-color: #e5e7eb;
+        color: #9ca3af;
+        cursor: not-allowed;
+      }
+
       .toggle-visibility {
         padding: 10px;
         background: none;
@@ -106,20 +112,22 @@
       }
 
       .status-message {
-        margin-top: 16px;
         padding: 12px;
         border-radius: 6px;
-        font-size: 14px;
+        margin-top: 16px;
+        display: none;
       }
 
-      .success {
+      .status-message.success {
         background-color: #ecfdf5;
-        color: #047857;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
       }
 
-      .error {
+      .status-message.error {
         background-color: #fef2f2;
-        color: #dc2626;
+        color: #991b1b;
+        border: 1px solid #fecaca;
       }
 
       .help-text {
@@ -135,6 +143,30 @@
 
       .get-key-link:hover {
         text-decoration: underline;
+      }
+
+      .refresh-button {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .refresh-button svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .refresh-button:disabled svg {
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
       }
     </style>
   </head>
@@ -187,6 +219,25 @@
             >Get one here</a
           >
         </p>
+      </div>
+
+      <div class="form-group">
+        <button id="refreshKnowledge" class="secondary refresh-button">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
+          </svg>
+          Refresh Knowledge List
+        </button>
       </div>
 
       <div

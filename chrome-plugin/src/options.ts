@@ -1,4 +1,5 @@
 import { getApiKey, setApiKey } from "./utils/storage";
+import { DatagridAPI } from "./services/datagrid-api";
 
 class OptionsUI {
   private readonly apiKeyInput: HTMLInputElement;
@@ -6,6 +7,8 @@ class OptionsUI {
   private readonly toggleVisibilityButton: HTMLButtonElement;
   private readonly statusMessage: HTMLElement;
   private readonly eyeIcon: SVGElement;
+  private readonly refreshButton: HTMLButtonElement;
+  private datagridApi: DatagridAPI | undefined;
 
   constructor() {
     this.apiKeyInput = document.getElementById("apiKey") as HTMLInputElement;
@@ -19,6 +22,9 @@ class OptionsUI {
       "statusMessage"
     ) as HTMLElement;
     this.eyeIcon = document.getElementById("eyeIcon") as unknown as SVGElement;
+    this.refreshButton = document.getElementById(
+      "refreshKnowledge"
+    ) as HTMLButtonElement;
 
     void this.initialize();
   }
@@ -32,6 +38,8 @@ class OptionsUI {
     const apiKey = await getApiKey();
     if (apiKey !== undefined) {
       this.apiKeyInput.value = apiKey;
+      this.datagridApi = new DatagridAPI(apiKey);
+      this.refreshButton.disabled = false;
     }
   }
 
@@ -40,6 +48,7 @@ class OptionsUI {
     this.toggleVisibilityButton.addEventListener("click", () =>
       this.toggleVisibility()
     );
+    this.refreshButton.addEventListener("click", () => this.refreshKnowledge());
 
     this.apiKeyInput.addEventListener("input", () => {
       this.saveButton.disabled = !this.apiKeyInput.value.trim();
@@ -63,10 +72,30 @@ class OptionsUI {
 
     try {
       await setApiKey(apiKey);
+      this.datagridApi = new DatagridAPI(apiKey);
+      this.refreshButton.disabled = false;
       this.showStatus("API key saved successfully", "success");
     } catch (error) {
       console.error("Error saving API key:", error);
       this.showStatus("Failed to save API key", "error");
+    }
+  }
+
+  private async refreshKnowledge() {
+    if (!this.datagridApi) {
+      this.showStatus("Please save your API key first", "error");
+      return;
+    }
+
+    try {
+      this.refreshButton.disabled = true;
+      await this.datagridApi.listKnowledge();
+      this.showStatus("Knowledge list refreshed successfully", "success");
+    } catch (error) {
+      console.error("Error refreshing knowledge list:", error);
+      this.showStatus("Failed to refresh knowledge list", "error");
+    } finally {
+      this.refreshButton.disabled = false;
     }
   }
 
