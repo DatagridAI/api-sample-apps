@@ -311,7 +311,7 @@ class ChatUI {
       this.chatState.isLoading = true;
       this.sendButton.disabled = true;
 
-      // Add user message
+      // Add user message to both UI and state
       this.addMessage(message);
       this.messageInput.value = "";
       this.messageInput.style.height = "auto";
@@ -319,33 +319,55 @@ class ChatUI {
       // Show typing indicator
       this.showTypingIndicator();
 
-      // Get response from API
-      const response = await this.datagridApi.chat(
+      // Create a temporary message element for streaming response
+      const streamingMessage: Message = {
+        id: crypto.randomUUID(),
+        type: "assistant",
+        content: "",
+        timestamp: Date.now(),
+      };
+
+      // Get streaming response from API
+      let firstMessage = true;
+      const response = await this.datagridApi.chatStream(
         this.chatState.messages,
         selectedContent,
         this.selectedKnowledgeId,
-        this.chatState.conversationId
+        this.chatState.conversationId,
+        (chunk) => {
+          if (firstMessage) {
+            // Add streaming message to both UI and state
+            this.addMessage(streamingMessage);
+            this.removeTypingIndicator();
+
+            firstMessage = false;
+          }
+          if (!chunk.done) {
+            // Update the streaming message content
+            streamingMessage.content += chunk.text;
+            this.updateMessageContent(
+              streamingMessage.id,
+              streamingMessage.content
+            );
+          }
+        }
       );
 
-      this.chatState.conversationId =
-        this.chatState.conversationId ?? response.conversationId;
-
-      let responseText = response.response;
-      try {
-        await navigator.clipboard.writeText(responseText);
-      } catch {
-        responseText = responseText += "\n\n_(Copied to clipboard failed)_";
+      // Update conversation ID if we got one
+      if (response.conversationId) {
+        this.chatState.conversationId = response.conversationId;
       }
-      // Remove typing indicator and add response
-      this.removeTypingIndicator();
-      this.addMessage({
-        id: crypto.randomUUID(),
-        type: "assistant",
-        content: responseText,
-        timestamp: Date.now(),
-      });
+
+      try {
+        await navigator.clipboard.writeText(response.response);
+      } catch {
+        streamingMessage.content += "\n\n_(Copied to clipboard failed)_";
+        this.updateMessageContent(
+          streamingMessage.id,
+          streamingMessage.content
+        );
+      }
     } catch (error) {
-      this.removeTypingIndicator();
       this.addMessage({
         id: crypto.randomUUID(),
         type: "assistant",
@@ -354,9 +376,22 @@ class ChatUI {
       });
       console.error("Error sending message:", error);
     } finally {
+      this.removeTypingIndicator();
       this.chatState.isLoading = false;
       this.sendButton.disabled = false;
       this.saveMessages();
+    }
+  }
+
+  private updateMessageContent(messageId: string, content: string) {
+    const messageElement = this.chatContainer.querySelector(
+      `[data-message-id="${messageId}"]`
+    );
+    if (messageElement) {
+      const mainContentElement = messageElement.querySelector(".main-content");
+      if (mainContentElement) {
+        mainContentElement.innerHTML = (window as any).marked.parse(content);
+      }
     }
   }
 
@@ -365,6 +400,7 @@ class ChatUI {
 
     const messageElement = document.createElement("div");
     messageElement.classList.add("message", `${message.type}-message`);
+    messageElement.setAttribute("data-message-id", message.id);
 
     // Create content container
     const contentElement = document.createElement("div");
