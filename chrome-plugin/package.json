@@ -1,0 +1,31 @@
+{
+  "name": "chrome-plugin",
+  "version": "1.0.0",
+  "description": "Datagrid in Chrome",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack --config webpack.config.js",
+    "watch": "webpack --config webpack.config.js --watch",
+    "generate-icons": "node scripts/generate-icons.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "chrome",
+    "extension",
+    "typescript"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "datagrid-ai": "^0.1.0-alpha.5"
+  },
+  "devDependencies": {
+    "@types/chrome": "0.0.284",
+    "copy-webpack-plugin": "^13.0.0",
+    "sharp": "^0.33.5",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.8.2",
+    "webpack": "^5.98.0",
+    "webpack-cli": "^6.0.1"
+  }
+}

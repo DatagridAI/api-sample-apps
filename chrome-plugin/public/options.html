@@ -1,0 +1,200 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Datagrid Assistant Settings</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 24px;
+        background-color: #f8f9fa;
+        color: #1a1a1a;
+      }
+
+      .container {
+        background-color: #ffffff;
+        padding: 24px;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        margin: 0 0 24px 0;
+        font-size: 24px;
+        font-weight: 600;
+      }
+
+      .form-group {
+        margin-bottom: 24px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #374151;
+      }
+
+      .input-group {
+        display: flex;
+        gap: 8px;
+      }
+
+      input[type="text"],
+      input[type="password"] {
+        flex: 1;
+        padding: 10px 12px;
+        border: 1px solid #e1e4e8;
+        border-radius: 6px;
+        font-size: 14px;
+        background-color: #f8f9fa;
+        transition: all 0.2s ease;
+      }
+
+      input[type="text"]:focus,
+      input[type="password"]:focus {
+        outline: none;
+        border-color: #0066ff;
+        background-color: #ffffff;
+        box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+      }
+
+      button {
+        background-color: #0066ff;
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: background-color 0.2s ease;
+      }
+
+      button:hover {
+        background-color: #0052cc;
+      }
+
+      button.secondary {
+        background-color: #f3f4f6;
+        color: #374151;
+      }
+
+      button.secondary:hover {
+        background-color: #e5e7eb;
+      }
+
+      .toggle-visibility {
+        padding: 10px;
+        background: none;
+        border: 1px solid #e1e4e8;
+        border-radius: 6px;
+        cursor: pointer;
+        color: #374151;
+      }
+
+      .toggle-visibility:hover {
+        background-color: #f3f4f6;
+      }
+
+      .toggle-visibility svg {
+        width: 20px;
+        height: 20px;
+        display: block;
+      }
+
+      .status-message {
+        margin-top: 16px;
+        padding: 12px;
+        border-radius: 6px;
+        font-size: 14px;
+      }
+
+      .success {
+        background-color: #ecfdf5;
+        color: #047857;
+      }
+
+      .error {
+        background-color: #fef2f2;
+        color: #dc2626;
+      }
+
+      .help-text {
+        margin-top: 8px;
+        font-size: 14px;
+        color: #6b7280;
+      }
+
+      .get-key-link {
+        color: #0066ff;
+        text-decoration: none;
+      }
+
+      .get-key-link:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Datagrid Assistant Settings</h1>
+
+      <div class="form-group">
+        <label for="apiKey">API Key</label>
+        <div class="input-group">
+          <input
+            type="password"
+            id="apiKey"
+            placeholder="Enter your Datagrid API key"
+          />
+          <button
+            class="toggle-visibility"
+            id="toggleVisibility"
+            title="Toggle visibility"
+          >
+            <svg
+              id="eyeIcon"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+              />
+            </svg>
+          </button>
+          <button id="saveButton">Save</button>
+        </div>
+        <p class="help-text">
+          Don't have an API key?
+          <a
+            href="https://app.datagrid.com/chats?at=chats&st=api_keys&redirect_url=chats?at=chats%26st=api_keys"
+            target="_blank"
+            class="get-key-link"
+            >Get one here</a
+          >
+        </p>
+      </div>
+
+      <div
+        id="statusMessage"
+        class="status-message"
+        style="display: none"
+      ></div>
+    </div>
+    <script src="options.js"></script>
+  </body>
+</html>
