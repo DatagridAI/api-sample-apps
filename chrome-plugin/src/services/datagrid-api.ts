@@ -16,11 +16,7 @@ export interface StreamingResponse {
 
 interface StreamEvent {
   event: "delta";
-  data: {
-    delta: {
-      text: string;
-    };
-  };
+  data: StreamingResponse;
 }
 
 export class DatagridAPI {
@@ -91,7 +87,7 @@ export class DatagridAPI {
   async chatStream(
     messages: Array<Message>,
     htmlContext?: string,
-    knowledgeId?: string | null | undefined,
+    knowledgeIds?: string[] | null | undefined,
     conversation_id?: string,
     onChunk?: (chunk: StreamingResponse) => void,
     tools?: Datagrid.AgentTools[]
@@ -105,8 +101,7 @@ export class DatagridAPI {
 
       const prompt = this.getPrompt(lastMessage.content, htmlContext);
 
-      const knowledge_ids =
-        typeof knowledgeId === "string" ? [knowledgeId] : [];
+      const knowledge_ids = knowledgeIds || [];
       const converseParams = {
         prompt,
         stream: true,
@@ -119,12 +114,12 @@ export class DatagridAPI {
       } as const;
 
       let fullResponse = "";
-      let finalConversationId = "";
+      let finalConversationId = conversation_id ?? "";
 
       const stream = await this.client.converse(converseParams);
 
       for await (const event of stream) {
-        const streamEvent = event as StreamEvent;
+        const streamEvent = event;
         if (streamEvent.event === "delta") {
           const chunkText = streamEvent.data.delta.text;
           fullResponse += chunkText;
@@ -137,11 +132,15 @@ export class DatagridAPI {
             });
           }
         }
+
+        if (streamEvent.event === "start") {
+          finalConversationId = streamEvent.data.conversation_id;
+        }
       }
 
       if (onChunk) {
         onChunk({
-          text: "",
+          text: `\n\n${finalConversationId}`,
           conversationId: finalConversationId,
           done: true,
         });
@@ -163,7 +162,7 @@ export class DatagridAPI {
   ): string {
     return `
     User Message: ${userMessage}
-    ${htmlContext !== undefined ? `Context: ${htmlContext}` : ""}
+    ${Boolean(htmlContext) ? `Context: ${htmlContext}` : ""}
     `;
   }
 }

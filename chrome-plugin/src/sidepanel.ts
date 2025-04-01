@@ -19,7 +19,7 @@ class ChatUI {
   private readonly knowledgeSearch: HTMLInputElement;
   private readonly selectedTags: HTMLElement;
   private datagridApi: DatagridAPI | undefined;
-  private selectedKnowledgeId: string | null = null;
+  private selectedKnowledgeIds: Set<string> = new Set();
   private allKnowledge: Array<Knowledge> = [];
 
   constructor() {
@@ -92,12 +92,12 @@ class ChatUI {
     }
 
     try {
-      const result = await chrome.storage.local.get(["selectedKnowledgeId"]);
+      const result = await chrome.storage.local.get(["selectedKnowledgeIds"]);
       this.allKnowledge = await this.datagridApi.listKnowledge();
       this.renderKnowledge();
 
-      if (result.selectedKnowledgeId !== undefined) {
-        this.selectedKnowledgeId = result.selectedKnowledgeId;
+      if (result.selectedKnowledgeIds !== undefined) {
+        this.selectedKnowledgeIds = new Set(result.selectedKnowledgeIds);
         this.updateSelectedTags();
       }
     } catch (error) {
@@ -121,17 +121,20 @@ class ChatUI {
     filteredKnowledge.forEach((knowledge) => {
       const option = document.createElement("div");
       option.className = `option ${
-        knowledge.id === this.selectedKnowledgeId ? "selected" : ""
+        this.selectedKnowledgeIds.has(knowledge.id) ? "selected" : ""
       }`;
       option.innerHTML = `
         <div class="option-header">
+          <input type="checkbox" id="knowledge-${knowledge.id}" value="${knowledge.id}" />
           <i class="mdi mdi-book-open-page-variant"></i>
           <span class="option-name">${knowledge.name}</span>
         </div>
         <div class="option-description">${knowledge.status}</div>
       `;
-      option.addEventListener("click", () =>
-        this.handleKnowledgeSelection(knowledge)
+      const checkbox = option.querySelector("input") as HTMLInputElement;
+      checkbox.checked = this.selectedKnowledgeIds.has(knowledge.id);
+      checkbox.addEventListener("change", () =>
+        this.handleKnowledgeSelection(knowledge, checkbox.checked)
       );
       this.optionsList.appendChild(option);
     });
@@ -150,19 +153,22 @@ class ChatUI {
     );
   }
 
-  private handleKnowledgeSelection(knowledge: Knowledge) {
+  private handleKnowledgeSelection(knowledge: Knowledge, checked: boolean) {
     if (knowledge.status !== "ready") {
       return;
     }
 
-    this.selectedKnowledgeId = knowledge.id;
+    if (checked) {
+      this.selectedKnowledgeIds.add(knowledge.id);
+    } else {
+      this.selectedKnowledgeIds.delete(knowledge.id);
+    }
+
     this.updateSelectedTags();
-    this.knowledgeSelector.classList.remove("open");
-    this.knowledgeSearch.value = "";
-    this.renderKnowledge();
+    this.renderKnowledge(this.knowledgeSearch.value);
 
     void chrome.storage.local.set({
-      selectedKnowledgeId: this.selectedKnowledgeId,
+      selectedKnowledgeIds: Array.from(this.selectedKnowledgeIds),
     });
   }
 
@@ -172,10 +178,8 @@ class ChatUI {
     ) as HTMLElement;
     selectedTagsContainer.innerHTML = "";
 
-    if (this.selectedKnowledgeId) {
-      const knowledge = this.allKnowledge.find(
-        (k) => k.id === this.selectedKnowledgeId
-      );
+    this.selectedKnowledgeIds.forEach((knowledgeId) => {
+      const knowledge = this.allKnowledge.find((k) => k.id === knowledgeId);
       if (knowledge) {
         const tag = document.createElement("div");
         tag.className = "tag";
@@ -186,16 +190,16 @@ class ChatUI {
         `;
         tag.querySelector("button")?.addEventListener("click", (e) => {
           e.stopPropagation(); // Prevent dropdown from opening when clicking the remove button
-          this.selectedKnowledgeId = null;
+          this.selectedKnowledgeIds.delete(knowledge.id);
           this.updateSelectedTags();
-          this.renderKnowledge();
+          this.renderKnowledge(this.knowledgeSearch.value);
           void chrome.storage.local.set({
-            selectedKnowledgeId: null,
+            selectedKnowledgeIds: Array.from(this.selectedKnowledgeIds),
           });
         });
         selectedTagsContainer.appendChild(tag);
       }
-    }
+    });
   }
 
   private setupEventListeners() {
@@ -448,7 +452,7 @@ class ChatUI {
       const response = await this.datagridApi.chatStream(
         this.chatState.messages,
         selectedContent,
-        this.selectedKnowledgeId,
+        Array.from(this.selectedKnowledgeIds),
         this.chatState.conversationId,
         (chunk) => {
           if (firstMessage) {
