@@ -1,6 +1,6 @@
 /// <reference types="chrome"/>
 import { getApiKey } from "./utils/storage";
-import { DatagridAPI } from "./services/datagrid-api";
+import { DatagridAPI, Knowledge } from "./services/datagrid-api";
 import { Message, ChatState } from "./types/chat";
 import type { Datagrid } from "datagrid-ai";
 
@@ -13,9 +13,14 @@ class ChatUI {
   private readonly settingsButton: HTMLElement;
   private readonly chatState: ChatState;
   private readonly clearButton: HTMLElement;
-  private readonly knowledgeSelect: HTMLSelectElement;
+  private readonly knowledgeSelector: HTMLElement;
+  private readonly knowledgeOptions: HTMLElement;
+  private readonly optionsList: HTMLElement;
+  private readonly knowledgeSearch: HTMLInputElement;
+  private readonly selectedTags: HTMLElement;
   private datagridApi: DatagridAPI | undefined;
   private selectedKnowledgeId: string | null = null;
+  private allKnowledge: Array<Knowledge> = [];
 
   constructor() {
     this.chatContainer = document.getElementById(
@@ -33,11 +38,23 @@ class ChatUI {
     ) as HTMLElement;
     this.settingsButton = document.getElementById(
       "settingsButton"
-    ) as HTMLElement;
+    ) as HTMLButtonElement;
     this.clearButton = document.getElementById("clearButton")!;
-    this.knowledgeSelect = document.getElementById(
-      "knowledgeSelect"
-    ) as HTMLSelectElement;
+    this.knowledgeSelector = document.getElementById(
+      "knowledgeSelector"
+    ) as HTMLElement;
+    this.knowledgeOptions = this.knowledgeSelector.querySelector(
+      ".select-options"
+    ) as HTMLElement;
+    this.optionsList = this.knowledgeSelector.querySelector(
+      ".options-list"
+    ) as HTMLElement;
+    this.knowledgeSearch = document.getElementById(
+      "knowledgeSearch"
+    ) as HTMLInputElement;
+    this.selectedTags = this.knowledgeSelector.querySelector(
+      ".selected-tags"
+    ) as HTMLElement;
     this.chatState = {
       messages: [],
       isLoading: false,
@@ -76,31 +93,108 @@ class ChatUI {
 
     try {
       const result = await chrome.storage.local.get(["selectedKnowledgeId"]);
-      const knowledgeList = await this.datagridApi.listKnowledge();
-
-      // Clear existing options except the default one
-      while (this.knowledgeSelect.options.length > 1) {
-        this.knowledgeSelect.remove(1);
-      }
-
-      // Add knowledge options
-      knowledgeList.forEach((knowledge) => {
-        const option = document.createElement("option");
-        option.value = knowledge.id;
-        option.text = knowledge.name;
-        if (knowledge.status !== "ready") {
-          option.text += ` (${knowledge.status})`;
-          option.disabled = true;
-        }
-        this.knowledgeSelect.add(option);
-      });
+      this.allKnowledge = await this.datagridApi.listKnowledge();
+      this.renderKnowledge();
 
       if (result.selectedKnowledgeId !== undefined) {
         this.selectedKnowledgeId = result.selectedKnowledgeId;
-        this.knowledgeSelect.value = result.selectedKnowledgeId;
+        this.updateSelectedTags();
       }
     } catch (error) {
       console.error("Error loading knowledge:", error);
+    }
+  }
+
+  private renderKnowledge(searchQuery: string = "") {
+    this.optionsList.innerHTML = "";
+
+    const filteredKnowledge = this.filterKnowledge(searchQuery);
+
+    if (filteredKnowledge.length === 0) {
+      const noResults = document.createElement("div");
+      noResults.className = "no-results";
+      noResults.textContent = "No knowledge found";
+      this.optionsList.appendChild(noResults);
+      return;
+    }
+
+    filteredKnowledge.forEach((knowledge) => {
+      const option = document.createElement("div");
+      option.className = `option ${
+        knowledge.id === this.selectedKnowledgeId ? "selected" : ""
+      }`;
+      option.innerHTML = `
+        <div class="option-header">
+          <i class="mdi mdi-book-open-page-variant"></i>
+          <span class="option-name">${knowledge.name}</span>
+        </div>
+        <div class="option-description">${knowledge.status}</div>
+      `;
+      option.addEventListener("click", () =>
+        this.handleKnowledgeSelection(knowledge)
+      );
+      this.optionsList.appendChild(option);
+    });
+  }
+
+  private filterKnowledge(query: string): Knowledge[] {
+    if (!query) {
+      return this.allKnowledge;
+    }
+
+    const searchQuery = query.toLowerCase();
+    return this.allKnowledge.filter(
+      (knowledge) =>
+        knowledge.name.toLowerCase().includes(searchQuery) ||
+        knowledge.status.toLowerCase().includes(searchQuery)
+    );
+  }
+
+  private handleKnowledgeSelection(knowledge: Knowledge) {
+    if (knowledge.status !== "ready") {
+      return;
+    }
+
+    this.selectedKnowledgeId = knowledge.id;
+    this.updateSelectedTags();
+    this.knowledgeSelector.classList.remove("open");
+    this.knowledgeSearch.value = "";
+    this.renderKnowledge();
+
+    void chrome.storage.local.set({
+      selectedKnowledgeId: this.selectedKnowledgeId,
+    });
+  }
+
+  private updateSelectedTags() {
+    const selectedTagsContainer = this.knowledgeSelector.querySelector(
+      ".selected-tags"
+    ) as HTMLElement;
+    selectedTagsContainer.innerHTML = "";
+
+    if (this.selectedKnowledgeId) {
+      const knowledge = this.allKnowledge.find(
+        (k) => k.id === this.selectedKnowledgeId
+      );
+      if (knowledge) {
+        const tag = document.createElement("div");
+        tag.className = "tag";
+        tag.innerHTML = `
+          <i class="mdi mdi-book-open-page-variant"></i>
+          ${knowledge.name}
+          <button type="button">x</button>
+        `;
+        tag.querySelector("button")?.addEventListener("click", (e) => {
+          e.stopPropagation(); // Prevent dropdown from opening when clicking the remove button
+          this.selectedKnowledgeId = null;
+          this.updateSelectedTags();
+          this.renderKnowledge();
+          void chrome.storage.local.set({
+            selectedKnowledgeId: null,
+          });
+        });
+        selectedTagsContainer.appendChild(tag);
+      }
     }
   }
 
@@ -128,17 +222,15 @@ class ChatUI {
 
     // Add clear history button handler
     this.clearButton?.addEventListener("click", () => {
-      // if (confirm("Are you sure you want to clear the chat history?")) {
       this.clearChatHistory();
-      // }
     });
 
-    this.knowledgeSelect.addEventListener("change", () => {
-      this.selectedKnowledgeId = this.knowledgeSelect.value || null;
-      void chrome.storage.local.set({
-        selectedKnowledgeId: this.selectedKnowledgeId,
-      });
-    });
+    // Knowledge selector events
+    this.knowledgeSelector
+      .querySelector(".select-header")
+      ?.addEventListener("click", () => this.toggleKnowledgeSelector());
+    document.addEventListener("click", (e) => this.handleClickOutside(e));
+    this.knowledgeSearch.addEventListener("input", () => this.handleSearch());
   }
 
   private showTypingIndicator() {
@@ -494,6 +586,25 @@ class ChatUI {
 
     // Clear messages from UI
     this.chatContainer.innerHTML = "";
+  }
+
+  private toggleKnowledgeSelector() {
+    this.knowledgeSelector.classList.toggle("open");
+    if (this.knowledgeSelector.classList.contains("open")) {
+      this.knowledgeSearch.focus();
+    }
+  }
+
+  private handleClickOutside(e: MouseEvent) {
+    if (!this.knowledgeSelector.contains(e.target as Node)) {
+      this.knowledgeSelector.classList.remove("open");
+      this.knowledgeSearch.value = "";
+      this.renderKnowledge();
+    }
+  }
+
+  private handleSearch() {
+    this.renderKnowledge(this.knowledgeSearch.value);
   }
 }
 

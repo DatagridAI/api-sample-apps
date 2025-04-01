@@ -403,7 +403,7 @@ class OptionsUI {
         tag.innerHTML = `
           <i class="mdi mdi-${tool.icon}"></i>
           ${tool.name}
-          <button type="button" data-tool-id="${tool.id}">X</button>
+          <button type="button" data-tool-id="${tool.id}">x</button>
         `;
         tag.querySelector("button")?.addEventListener("click", () => {
           const checkbox = document.getElementById(

@@ -31,9 +31,15 @@ export class DatagridAPI {
     console.debug("DatagridAPI initialized");
   }
 
-  async listKnowledge(): Promise<Array<Knowledge>> {
+  async listKnowledge(
+    after?: string,
+    limit: number = 100
+  ): Promise<Array<Knowledge>> {
     try {
-      const knowledgePage = await this.client.knowledge.list();
+      const knowledgePage = await this.client.knowledge.list({
+        after,
+        limit, // Get a large number of items per page
+      });
       return knowledgePage.data;
     } catch (error) {
       console.error("Failed to list knowledge:", error);

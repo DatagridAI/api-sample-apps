@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
     <title>Datagrid Assistant</title>
@@ -98,14 +98,8 @@
       }
 
       .message code {
-        font-family:
-          ui-monospace,
-          SFMono-Regular,
-          SF Mono,
-          Menlo,
-          Consolas,
-          Liberation Mono,
-          monospace;
+        font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
+          Liberation Mono, monospace;
         font-size: 0.9em;
         padding: 0.2em 0.4em;
         background-color: #f6f8fa;
@@ -304,34 +298,198 @@
         }
       }
 
-      .knowledge-select {
-        padding: 6px 10px;
-        border: 1px solid #e1e4e8;
-        border-radius: 6px;
-        font-size: 14px;
-        background-color: #f8f9fa;
-        color: #1a1a1a;
-        min-width: 200px;
-        cursor: pointer;
+      .knowledge-selector {
+        position: relative;
+        width: 100%;
+        max-width: 300px;
       }
 
-      .knowledge-select:focus {
-        outline: none;
-        border-color: #0066ff;
+      .knowledge-selector .select-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 12px;
+        border: 1px solid #e1e4e8;
+        border-radius: 6px;
+        background-color: #f8f9fa;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        gap: 8px;
+      }
+
+      .knowledge-selector .search-input {
+        padding: 8px 12px;
+        border: 1px solid #e1e4e8;
+        border-radius: 6px;
+        margin: 8px;
+        width: calc(100% - 24px);
+        font-size: 14px;
         background-color: #ffffff;
       }
 
-      .knowledge-select option {
-        padding: 8px;
+      .knowledge-selector .search-input:focus {
+        outline: none;
+        border-color: #0066ff;
+        box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+      }
+
+      .knowledge-selector .option {
+        display: flex;
+        flex-direction: column;
+        padding: 8px 12px;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+      }
+
+      .knowledge-selector .option-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .knowledge-selector .option-name {
+        font-weight: 500;
+        color: #374151;
+      }
+
+      .knowledge-selector .option-description {
+        font-size: 13px;
+        color: #6b7280;
+        margin-left: 28px;
+        margin-top: 2px;
+      }
+
+      .knowledge-selector .no-results {
+        padding: 12px;
+        text-align: center;
+        color: #6b7280;
+        font-size: 14px;
+      }
+
+      .knowledge-selector .select-header:hover {
+        background-color: #f3f4f6;
+      }
+
+      .knowledge-selector .select-header:focus {
+        outline: none;
+        border-color: #0066ff;
+        background-color: #ffffff;
+        box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+      }
+
+      .knowledge-selector .select-header svg {
+        width: 20px;
+        height: 20px;
+        transition: transform 0.2s ease;
+      }
+
+      .knowledge-selector.open .select-header svg {
+        transform: rotate(180deg);
+      }
+
+      .knowledge-selector .select-options {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        margin-top: 4px;
+        background-color: #ffffff;
+        border: 1px solid #e1e4e8;
+        border-radius: 6px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .knowledge-selector.open .select-options {
+        display: block;
+      }
+
+      .knowledge-selector .option:hover {
+        background-color: #f3f4f6;
+      }
+
+      .knowledge-selector .option.selected {
+        background-color: #e5e7eb;
+      }
+
+      .knowledge-selector .selected-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        flex: 1;
+        min-height: 24px;
+      }
+
+      .knowledge-selector .tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 6px;
+        background-color: #e5e7eb;
+        border-radius: 4px;
+        font-size: 12px;
+        color: #374151;
+        margin-right: 4px;
+      }
+
+      .knowledge-selector .tag button {
+        margin-left: 4px;
+        padding: 0;
+        background: none;
+        border: none;
+        color: #6b7280;
+        cursor: pointer;
+        font-size: 12px;
+        line-height: 1;
+      }
+
+      .knowledge-selector .tag button:hover {
+        color: #374151;
+      }
+
+      .knowledge-selector .placeholder {
+        color: #6b7280;
+        flex: 1;
+      }
+
+      .knowledge-selector .select-header:has(.tag) .placeholder {
+        display: none;
       }
     </style>
   </head>
   <body>
     <div class="header">
       <h1>Datagrid Assistant</h1>
-      <select id="knowledgeSelect" class="knowledge-select">
-        <option value="">Select knowledge...</option>
-      </select>
+      <div class="knowledge-selector" id="knowledgeSelector">
+        <div class="select-header">
+          <div class="selected-tags"></div>
+          <span class="placeholder">Select knowledge...</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </div>
+        <div class="select-options">
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Search knowledge..."
+            id="knowledgeSearch"
+          />
+          <div class="options-list"></div>
+        </div>
+      </div>
       <div
         style="margin-left: auto; display: flex; gap: 8px; align-items: center"
       >
