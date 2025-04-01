@@ -75,6 +75,7 @@ class ChatUI {
     }
 
     try {
+      const result = await chrome.storage.local.get(["selectedKnowledgeId"]);
       const knowledgeList = await this.datagridApi.listKnowledge();
 
       // Clear existing options except the default one
@@ -93,6 +94,11 @@ class ChatUI {
         }
         this.knowledgeSelect.add(option);
       });
+
+      if (result.selectedKnowledgeId !== undefined) {
+        this.selectedKnowledgeId = result.selectedKnowledgeId;
+        this.knowledgeSelect.value = result.selectedKnowledgeId;
+      }
     } catch (error) {
       console.error("Error loading knowledge:", error);
     }
@@ -129,6 +135,9 @@ class ChatUI {
 
     this.knowledgeSelect.addEventListener("change", () => {
       this.selectedKnowledgeId = this.knowledgeSelect.value || null;
+      void chrome.storage.local.set({
+        selectedKnowledgeId: this.selectedKnowledgeId,
+      });
     });
   }
 
@@ -277,7 +286,10 @@ class ChatUI {
       }
 
       // Check if we're on a chrome:// URL
-      if (tab.url?.startsWith("chrome://")) {
+      if (
+        tab.url?.startsWith("chrome://") ||
+        tab.url?.startsWith("chrome-extension://")
+      ) {
         console.log("Cannot access chrome:// URLs");
         return "";
       }
@@ -312,7 +324,6 @@ class ChatUI {
       ? selectedTools
       : undefined;
 
-
     const message: Message = {
       id: crypto.randomUUID(),
       type: "user",
@@ -332,7 +343,6 @@ class ChatUI {
 
       // Show typing indicator
       this.showTypingIndicator();
-
       // Create a temporary message element for streaming response
       const streamingMessage: Message = {
         id: crypto.randomUUID(),
