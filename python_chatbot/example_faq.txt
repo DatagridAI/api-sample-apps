@@ -1,0 +1,11 @@
+Q: What are your business hours?
+A: Our business hours are Monday to Friday, 9 AM to 5 PM.
+
+Q: How can I reset my password?
+A: You can reset your password by clicking on the 'Forgot Password' link on the login page.
+
+Q: What is your return policy?
+A: We offer a 30-day return policy for most items. Please check our website for more details.
+
+Q: How do I contact customer support?
+A: You can contact customer support via email at support@example.com or by phone at 1-800-555-1212.
