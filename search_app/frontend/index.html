@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datagrid Search App</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
+        .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #333; }
+        h2 { margin-top: 30px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="file"], select {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover { background-color: #0056b3; }
+        #results {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #e9e9e9;
+            min-height: 100px;
+            white-space: pre-wrap; /* To display JSON nicely */
+            word-wrap: break-word;
+        }
+        .section { margin-bottom: 30px; }
+        .backend-selector { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Datagrid Search App</h1>
+
+        <div class="backend-selector">
+            <label for="backendSelector">Select Backend:</label>
+            <select id="backendSelector">
+                <option value="python">Python (localhost:5000)</option>
+                <option value="typescript">TypeScript (localhost:3000)</option>
+            </select>
+        </div>
+
+        <div class="section">
+            <h2>File Upload</h2>
+            <label for="fileInput">Choose a file:</label>
+            <input type="file" id="fileInput">
+            <button id="uploadButton">Upload</button>
+        </div>
+
+        <div class="section">
+            <h2>Search</h2>
+            <label for="searchInput">Enter search query:</label>
+            <input type="text" id="searchInput" placeholder="e.g., customer data">
+            <button id="searchButton">Search</button>
+        </div>
+
+        <div class="section">
+            <h2>Results</h2>
+            <div id="results">
+                <!-- Results will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
